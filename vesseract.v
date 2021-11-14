@@ -6,10 +6,11 @@ import os
 pub struct Tesseract_box {
 pub:
 	letter string
-	x1 int
-	y1 int
-	x2 int
-	y2 int
+	x1     u32
+	y1     u32
+	x2     u32
+	y2     u32
+	page   u32
 }
 
 // Used as a parameter
@@ -136,4 +137,48 @@ pub fn image_to_alto_xml(t Tesseract) ?string {
 
 	// Get XML
 	return xml
+}
+
+// Get bounding boxes from Tesseract
+// Return an array of Tesseract boxes
+pub fn image_to_boxes(t Tesseract) ?[]Tesseract_box {
+	// Run tesseract with bounding box detection
+	result := extract_text_tesseract(
+		image: t.image
+		lang: t.lang
+		args: t.args + ' batch.nochop makebox'
+	) or { return err }
+
+	// Load box file
+	box_file := os.read_file(result.id + '.box') or { return err }
+	lines := box_file.split('\n')
+
+	// Delete "box" file and txt
+	os.rm(result.id + '.box') ?
+
+	// Hold results
+	mut boxes := []Tesseract_box{}
+
+	// Parse
+	for line in lines {
+		// Letter, x1, y1, x2, y1, page
+		// Example: H 68 206 91 235 0
+		content := line.split(' ')
+
+		// Skip malformed lines
+		if content.len != 6 {
+			continue
+		}
+
+		boxes << Tesseract_box{
+			letter: content[0]
+			x1: content[1].u32()
+			y1: content[2].u32()
+			x2: content[3].u32()
+			y2: content[4].u32()
+			page: content[5].u32()
+		}
+	}
+
+	return boxes
 }

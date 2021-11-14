@@ -11,3 +11,9 @@ pub fn image_to_alto_xml_path(image_path string) ?string {
 pub fn image_to_string_path(filepath string) ?string {
 	return image_to_string(image: filepath, lang: 'eng', args: '')
 }
+
+// Variant of image_to_boxes, only a file path is required
+[inline]
+pub fn image_to_boxes_path(filepath string) ?[]Tesseract_box {
+	return image_to_boxes(image: filepath, lang: 'eng', args: '')
+}

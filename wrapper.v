@@ -15,6 +15,8 @@ pub:
 	output_filename string
 	// Tesseract output stdout
 	stdout_result string
+	// ID generated
+	id string
 }
 
 // Generate a id for a document to be processed
@@ -55,9 +57,9 @@ fn extract_text_tesseract(t Tesseract) ?Tesseract_output {
 	args << t.image
 
 	// Output tmp - Random ID
-	id := generate_id()
+	doc_id := generate_id()
 	// Output file (tesseract append .txt)
-	args << id
+	args << doc_id
 
 	if t.lang.len > 0 {
 		args << '-l ' + t.lang
@@ -74,7 +76,8 @@ fn extract_text_tesseract(t Tesseract) ?Tesseract_output {
 	return Tesseract_output{
 		image_path: t.image
 		arguments: args
-		output_filename: id + '.txt'
+		output_filename: doc_id + '.txt'
 		stdout_result: stdout
+		id: doc_id
 	}
 }

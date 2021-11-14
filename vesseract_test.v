@@ -58,3 +58,13 @@ fn test_image_to_alto_xml_path() {
 	xml := image_to_alto_xml_path('sample/demo.png') or { panic(err) }
 	assert xml.contains('http://www.loc.gov/standards/alto/ns-v3#')
 }
+
+fn test_image_to_boxes() {
+	boxes := image_to_boxes(image: 'sample/demo.png', lang: 'eng', args: '') or { panic(err) }
+
+	assert boxes[0].x1 == 68
+	assert boxes[0].y1 == 206
+	assert boxes[0].x2 == 91
+	assert boxes[0].y2 == 235
+	assert boxes.len == 16
+}
