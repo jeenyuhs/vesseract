@@ -1,10 +1,37 @@
 # Vesseract
 
-A V wrapper for Tesseract-OCR!
+A V wrapper for Tesseract-OCR inspired by pytesseract!
 
-Only contains string extraction currently.
+Install the package from VPM:
+```
+v install barrack-obama.vesseract
+```
+# Quickstart
 
-# Example
-![](https://i.imgur.com/Y3WR6Av.png)
+```v
+import vesseract
 
-![](https://i.imgur.com/kB7TlgY.png)
+// Extract text from image
+text := vesseract.image_to_string(
+        image: 'sample/demo.png', lang: 'eng', args: '') or {
+		panic(err)
+}
+// Got: Hi from Vesseract !
+println("Got: $text")
+
+// Get tesseract version
+version := vesseract.get_tesseract_version()
+// 4.1.0 installed: "Tesseract 4 - 1 - 0 detected!
+println("Tesseract $version.major - $version.minor - $version.patch detected!")
+
+// Get languages supported by Tesseract
+langs := vesseract.get_languages()
+// Example: ['afr', 'amh', 'ara', 'asm', ... 'uzb_cyrl', 'vie', 'yid', 'yor']
+```
+# Contributors
+
+* Simon "Barrack Obama"
+* SheatNoisette
+# License
+
+This wrapper is licensed under the MIT License, see ```LICENSE``` for details
