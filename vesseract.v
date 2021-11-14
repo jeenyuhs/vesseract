@@ -14,6 +14,15 @@ pub:
 	output string = 'txt'
 }
 
+pub struct Tesseract_version {
+pub:
+	major int
+	minor int
+	patch int
+	str   string = '0.0.0'
+	raw   string = 'tesseract'
+}
+
 // Run Tesseract-OCR with arguments
 fn run_tesseract(arguments []string) ?string {
 	mut s := os.execute('tesseract ' + arguments.join(' '))
@@ -85,4 +94,36 @@ pub fn get_languages() ?[]string {
 	}
 
 	return langs_supported
+}
+
+// Get tesseract-OCR version
+pub fn get_tesseract_version() ?Tesseract_version {
+	// Get tesseract version
+	t_result := run_tesseract(['--version']) or { return err }
+
+	// Get tesseract string
+	lines := t_result.split('\n')
+	t_version_raw := lines[0].trim('\r')
+
+	// Extract version string - ex: 4.1.1
+	t_version_str := t_version_raw.split(' ')[1]
+
+	// Get version numbers
+	t_version_num := t_version_str.split('.')
+
+	// Extract major/medium/minor
+	t_version_major := int(t_version_num[0].u32())
+	t_version_minor := int(t_version_num[1].u32())
+	t_version_patch := int(t_version_num[2].u32())
+
+	// Set values into struct
+	mut version_struct := Tesseract_version{
+		major: t_version_major
+		minor: t_version_minor
+		patch: t_version_patch
+		str: t_version_str
+		raw: t_version_raw
+	}
+
+	return version_struct
 }
