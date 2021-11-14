@@ -7,5 +7,5 @@ test:
 	@echo "Running tests..."
 	$(v_compiler) test .
 
-format:
+fmt:
 	$(v_compiler) fmt -w .
