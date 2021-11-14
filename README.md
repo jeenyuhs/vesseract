@@ -40,10 +40,6 @@ alto := vesseract.image_to_alto_xml('sample/demo.png') or { panic(err) }
 // "XML: <?xml version="1.0" encoding="UTF-8"?> ... "
 println("XML: $alto")
 ```
-# Contributors
-
-* Simon "Barrack Obama"
-* SheatNoisette
 # License
 
 This wrapper is licensed under the MIT License, see ```LICENSE``` for details
