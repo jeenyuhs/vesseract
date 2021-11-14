@@ -1,4 +1,6 @@
-A V wrapper for Tesseract-OCR
+# Vesseract
+
+A V wrapper for Tesseract-OCR!
 
 Only contains string extraction currently.
 
