@@ -137,3 +137,27 @@ pub fn get_tesseract_version() ?Tesseract_version {
 
 	return version_struct
 }
+
+// Get alto representation from Tesseract-OCR
+pub fn image_to_alto_xml(image string) ?string {
+	// Tesseract option: -c tessedit_create_alto=1
+
+	// Check version for alto support
+	ver := get_tesseract_version() or { return err }
+
+	if ver.major <= 4 && ver.minor < 1 {
+		return error('vesseract: Alto export require Tesseract >= 4.1.0')
+	}
+
+	// Run tesseract
+	run_tesseract([image, 'out', '-c tessedit_create_alto=1']) or { return err }
+
+	// Read output
+	xml := os.read_file('out.xml') or { return err }
+
+	// Delete
+	os.rm('out.xml') ?
+
+	// Get XML
+	return xml
+}

@@ -7,3 +7,4 @@ vesseract
 *.dylib
 *.dll
 *.txt
+*.xml

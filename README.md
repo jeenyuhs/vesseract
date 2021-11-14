@@ -27,6 +27,11 @@ println("Tesseract $version.major - $version.minor - $version.patch detected!")
 // Get languages supported by Tesseract
 langs := vesseract.get_languages()
 // Example: ['afr', 'amh', 'ara', 'asm', ... 'uzb_cyrl', 'vie', 'yid', 'yor']
+
+// Get alto xml
+alto := vesseract.image_to_alto_xml()
+// "XML: <?xml version="1.0" encoding="UTF-8"?> ... "
+println("XML: $alto")
 ```
 # Contributors
 

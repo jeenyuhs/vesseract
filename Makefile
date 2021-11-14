@@ -9,3 +9,6 @@ test:
 
 fmt:
 	$(v_compiler) fmt -w .
+
+clean:
+	$(RM) *.xml *.txt
