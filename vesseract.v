@@ -2,10 +2,6 @@ module vesseract
 
 import os
 
-const (
-	supported = ['PNG', 'JPEG']
-)
-
 pub struct Tesseract {
 pub:
 	// Image path
@@ -13,8 +9,7 @@ pub:
 	// Custom arguments
 	args string
 	// Set language
-	lang   string
-	output string = 'txt'
+	lang string = 'eng'
 }
 
 pub struct Tesseract_version {
@@ -29,18 +24,28 @@ pub:
 // Extract text from image
 pub fn image_to_string(t Tesseract) ?string {
 	// Run tesseract
-	extract_text_tesseract(t) or { return err }
+	result := extract_text_tesseract(t) or { return err }
 
 	// Tmp txt file output
-	path := t.output + '.txt'
+	file_path := result.output_filename
 
 	// Read output
-	str := os.read_file(path) or { return err }
+	str := os.read_file(file_path) or { return err }
 
 	// Remove tmp txt file
-	os.rm(path) ?
+	os.rm(file_path) ?
+
+	// Check if tesseract find something
+	if str.len <= 1 {
+		return ''
+	}
 
 	return str[..str.len - 2]
+}
+
+// Variant of image_to_string, only a file path is required
+pub fn image_to_string_path(filepath string) ?string {
+	return image_to_string(image: filepath, lang: 'eng', args: '')
 }
 
 // Get installed languages from Tesseract-OCR
@@ -83,7 +88,7 @@ pub fn get_tesseract_version() ?Tesseract_version {
 	// Get version numbers
 	t_version_num := t_version_str.split('.')
 
-	// Extract major/medium/minor
+	// Extract major/minor/patch
 	t_version_major := int(t_version_num[0].u32())
 	t_version_minor := int(t_version_num[1].u32())
 	t_version_patch := int(t_version_num[2].u32())
@@ -109,14 +114,18 @@ pub fn image_to_alto_xml(image string) ?string {
 		return error('vesseract: Alto export require Tesseract >= 4.1.0')
 	}
 
+	// Generate result id
+	id := generate_id()
+	xml_filename := id + '.xml'
+
 	// Run tesseract
-	run_tesseract([image, 'out', '-c tessedit_create_alto=1']) or { return err }
+	run_tesseract([image, id, '-c tessedit_create_alto=1']) or { return err }
 
 	// Read output
-	xml := os.read_file('out.xml') or { return err }
+	xml := os.read_file(xml_filename) or { return err }
 
 	// Delete
-	os.rm('out.xml') ?
+	os.rm(xml_filename) ?
 
 	// Get XML
 	return xml

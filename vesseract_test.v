@@ -43,6 +43,12 @@ fn test_image_to_string_demo() {
 	assert text == 'Hi from Vesseract !'
 }
 
+fn test_image_to_string_empty() {
+	text := image_to_string(image: 'sample/empty.png', lang: 'eng', args: '') or { panic(err) }
+
+	assert text == ''
+}
+
 fn test_image_to_alto_xml() {
 	xml := image_to_alto_xml('sample/demo.png') or { panic(err) }
 	assert xml.contains('http://www.loc.gov/standards/alto/ns-v3#')
