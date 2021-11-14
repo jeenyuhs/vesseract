@@ -138,7 +138,7 @@ pub fn get_tesseract_version() ?Tesseract_version {
 	return version_struct
 }
 
-// Get alto representation from Tesseract-OCR
+// Get alto representation from Tesseract-OCR as XML format
 pub fn image_to_alto_xml(image string) ?string {
 	// Tesseract option: -c tessedit_create_alto=1
 

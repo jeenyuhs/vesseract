@@ -44,6 +44,6 @@ fn test_image_to_string_demo() {
 }
 
 fn test_image_to_alto_xml() {
-	xml := image_to_alto_xml('sample/demo.png') or {panic(err)}
-	assert xml.contains("http://www.loc.gov/standards/alto/ns-v3#")
+	xml := image_to_alto_xml('sample/demo.png') or { panic(err) }
+	assert xml.contains('http://www.loc.gov/standards/alto/ns-v3#')
 }
