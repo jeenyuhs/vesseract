@@ -5,7 +5,7 @@ A "WIP" V wrapper for Tesseract-OCR inspired by pytesseract wrapper!
 Tesseract OCR is a optical character recognition software made by Google,
 it can "read" text from an image.
 
-First install Tesseract and check if it is registered in your path.
+You need to install Tesseract 4 and register it in your path.
 
 Install the package from VPM:
 ```
@@ -40,6 +40,19 @@ println("$langs")
 alto := vesseract.image_to_alto_xml_path('sample/demo.png') or { panic(err) }
 // "XML: <?xml version="1.0" encoding="UTF-8"?> ... "
 println("XML: $alto")
+
+// Get bounding boxes for letters
+boxes := image_to_boxes(image: 'sample/demo.png', lang: 'eng', args: '') or { panic(err) }
+println("$boxes")
+/* "[.Tesseract_box{
+    letter: 'H'
+    x1: 68
+    y1: 206
+    x2: 91
+    y2: 235
+    page: 0
+}, ... "
+
 ```
 # License
 
