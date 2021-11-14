@@ -26,44 +26,6 @@ pub:
 	raw   string = 'tesseract'
 }
 
-// Run Tesseract-OCR with arguments
-fn run_tesseract(arguments []string) ?string {
-	mut s := os.execute('tesseract ' + arguments.join(' '))
-
-	if s.exit_code != 0 {
-		return error("vesseract: error $s.exit_code \"$s.output\"")
-	}
-
-	return s.output
-}
-
-fn extract_text_tesseract(t Tesseract) ? {
-	if !os.exists(t.image) {
-		return error('vesseract: Image not found.')
-	}
-
-	// Arguments
-	mut args := []string{}
-
-	// Add image path
-	args << t.image
-
-	// Output tmp
-	args << t.output
-
-	if t.lang.len > 0 {
-		args << '-l ' + t.lang
-	}
-
-	// Add more args if required
-	if t.args.len > 0 {
-		args << t.args
-	}
-
-	// Run tesseract with custom arguments
-	run_tesseract(args) or { return err }
-}
-
 // Extract text from image
 pub fn image_to_string(t Tesseract) ?string {
 	// Run tesseract
@@ -127,15 +89,13 @@ pub fn get_tesseract_version() ?Tesseract_version {
 	t_version_patch := int(t_version_num[2].u32())
 
 	// Set values into struct
-	mut version_struct := Tesseract_version{
+	return Tesseract_version{
 		major: t_version_major
 		minor: t_version_minor
 		patch: t_version_patch
 		str: t_version_str
 		raw: t_version_raw
 	}
-
-	return version_struct
 }
 
 // Get alto representation from Tesseract-OCR as XML format
