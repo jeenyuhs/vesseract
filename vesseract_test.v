@@ -50,6 +50,11 @@ fn test_image_to_string_empty() {
 }
 
 fn test_image_to_alto_xml() {
-	xml := image_to_alto_xml('sample/demo.png') or { panic(err) }
+	xml := image_to_alto_xml(image: 'sample/demo.png', lang: 'eng', args: '') or { panic(err) }
+	assert xml.contains('http://www.loc.gov/standards/alto/ns-v3#')
+}
+
+fn test_image_to_alto_xml_path() {
+	xml := image_to_alto_xml_path('sample/demo.png') or { panic(err) }
 	assert xml.contains('http://www.loc.gov/standards/alto/ns-v3#')
 }

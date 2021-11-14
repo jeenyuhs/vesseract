@@ -37,7 +37,7 @@ langs := vesseract.get_languages() or { panic(err) }
 println("$langs")
 
 // Get alto xml - Require Tesseract >4.1.0
-alto := vesseract.image_to_alto_xml('sample/demo.png') or { panic(err) }
+alto := vesseract.image_to_alto_xml_path('sample/demo.png') or { panic(err) }
 // "XML: <?xml version="1.0" encoding="UTF-8"?> ... "
 println("XML: $alto")
 ```

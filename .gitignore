@@ -6,5 +6,8 @@ vesseract
 *.so
 *.dylib
 *.dll
+
+# Tesseract
 *.txt
 *.xml
+*.box

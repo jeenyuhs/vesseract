@@ -2,6 +2,17 @@ module vesseract
 
 import os
 
+// Used for bounding box detection
+pub struct Tesseract_box {
+pub:
+	letter string
+	x1 int
+	y1 int
+	x2 int
+	y2 int
+}
+
+// Used as a parameter
 pub struct Tesseract {
 pub:
 	// Image path
@@ -12,6 +23,7 @@ pub:
 	lang string = 'eng'
 }
 
+// Used to make it easier to get tesseract version
 pub struct Tesseract_version {
 pub:
 	major int
@@ -41,11 +53,6 @@ pub fn image_to_string(t Tesseract) ?string {
 	}
 
 	return str[..str.len - 2]
-}
-
-// Variant of image_to_string, only a file path is required
-pub fn image_to_string_path(filepath string) ?string {
-	return image_to_string(image: filepath, lang: 'eng', args: '')
 }
 
 // Get installed languages from Tesseract-OCR
@@ -104,7 +111,7 @@ pub fn get_tesseract_version() ?Tesseract_version {
 }
 
 // Get alto representation from Tesseract-OCR as XML format
-pub fn image_to_alto_xml(image string) ?string {
+pub fn image_to_alto_xml(t Tesseract) ?string {
 	// Tesseract option: -c tessedit_create_alto=1
 
 	// Check version for alto support
@@ -119,7 +126,7 @@ pub fn image_to_alto_xml(image string) ?string {
 	xml_filename := id + '.xml'
 
 	// Run tesseract
-	run_tesseract([image, id, '-c tessedit_create_alto=1']) or { return err }
+	run_tesseract([t.image, id, '-c tessedit_create_alto=1', t.args]) or { return err }
 
 	// Read output
 	xml := os.read_file(xml_filename) or { return err }
