@@ -12,6 +12,7 @@ v install barrack-obama.vesseract
 import vesseract
 
 // Extract text from image
+// Image: path - lang: Language for tesseract - args: custom arguments
 text := vesseract.image_to_string(
         image: 'sample/demo.png', lang: 'eng', args: '') or {
 		panic(err)
