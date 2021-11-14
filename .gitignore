@@ -6,3 +6,4 @@ vesseract
 *.so
 *.dylib
 *.dll
+*.txt
