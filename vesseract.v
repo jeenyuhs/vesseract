@@ -2,10 +2,18 @@ module vesseract
 
 import os
 
-const (
-	supported = ['PNG', 'JPEG']
-)
+// Used for bounding box detection
+pub struct Tesseract_box {
+pub:
+	letter string
+	x1     u32
+	y1     u32
+	x2     u32
+	y2     u32
+	page   u32
+}
 
+// Used as a parameter
 pub struct Tesseract {
 pub:
 	// Image path
@@ -13,10 +21,10 @@ pub:
 	// Custom arguments
 	args string
 	// Set language
-	lang   string
-	output string = 'txt'
+	lang string = 'eng'
 }
 
+// Used to make it easier to get tesseract version
 pub struct Tesseract_version {
 pub:
 	major int
@@ -26,69 +34,35 @@ pub:
 	raw   string = 'tesseract'
 }
 
-// Run Tesseract-OCR with arguments
-fn run_tesseract(arguments []string) ?string {
-	mut s := os.execute('tesseract ' + arguments.join(' '))
-
-	if s.exit_code != 0 {
-		return error("vesseract: error $s.exit_code \"$s.output\"")
-	}
-
-	return s.output
-}
-
-fn extract_text_tesseract(t Tesseract) ? {
-	if !os.exists(t.image) {
-		return error('vesseract: Image not found.')
-	}
-
-	// Arguments
-	mut args := []string{}
-
-	// Add image path
-	args << t.image
-
-	// Output tmp
-	args << t.output
-
-	if t.lang.len > 0 {
-		args << '-l ' + t.lang
-	}
-
-	// Add more args if required
-	if t.args.len > 0 {
-		args << t.args
-	}
-
-	// Run tesseract with custom arguments
-	run_tesseract(args) or { return err }
-}
-
 // Extract text from image
 pub fn image_to_string(t Tesseract) ?string {
 	// Run tesseract
-	extract_text_tesseract(t) or { return err }
+	result := extract_text_tesseract(t) or { return err }
 
 	// Tmp txt file output
-	path := t.output + '.txt'
+	file_path := result.output_filename
 
 	// Read output
-	str := os.read_file(path) or { return err }
+	str := os.read_file(file_path) or { return err }
 
 	// Remove tmp txt file
-	os.rm(path) ?
+	os.rm(file_path) ?
+
+	// Check if tesseract find something
+	if str.len <= 1 {
+		return ''
+	}
 
 	return str[..str.len - 2]
 }
 
-// Get installed languages from Tesseract-OCR
-// return a list of languages code
-pub fn get_languages() ?[]string {
-	// Language list
-	mut langs_supported := []string{}
-
+// Generate a map containing all of the languages supported by tesseract
+fn get_language_map() ?map[string]bool {
 	// Get tesseract langs
 	t_result := run_tesseract(['--list-langs']) or { return err }
+
+	// Language list
+	mut langs_supported := map[string]bool{}
 
 	// Split
 	content := t_result.split('\n')
@@ -99,11 +73,40 @@ pub fn get_languages() ?[]string {
 
 		// Filter empty lines
 		if line.len > 0 {
-			langs_supported << content[i]
+			langs_supported[content[i]] = true
 		}
 	}
 
 	return langs_supported
+}
+
+// Get installed languages from Tesseract-OCR
+// return a list of languages code
+pub fn get_languages() ?[]string {
+	// Get tesseract langs
+	t_result := run_tesseract(['--list-langs']) or { return err }
+
+	// Get language map
+	lang_map := get_language_map()  or { return err }
+
+	// Language list
+	mut langs_supported := []string{}
+
+	// Skip first line
+	for code, _ in lang_map {
+		langs_supported << code
+	}
+
+	return langs_supported
+}
+
+// Check if a language code is supported
+// No optional as this make the code easier to write
+// Return false on tesseract error (or not available), return true if supported
+pub fn is_language_code_supported(code string) bool {
+	// Get a map of langages
+	map_lang := get_language_map() or { return false }
+	return code in map_lang
 }
 
 // Get tesseract-OCR version
@@ -121,25 +124,23 @@ pub fn get_tesseract_version() ?Tesseract_version {
 	// Get version numbers
 	t_version_num := t_version_str.split('.')
 
-	// Extract major/medium/minor
+	// Extract major/minor/patch
 	t_version_major := int(t_version_num[0].u32())
 	t_version_minor := int(t_version_num[1].u32())
 	t_version_patch := int(t_version_num[2].u32())
 
 	// Set values into struct
-	mut version_struct := Tesseract_version{
+	return Tesseract_version{
 		major: t_version_major
 		minor: t_version_minor
 		patch: t_version_patch
 		str: t_version_str
 		raw: t_version_raw
 	}
-
-	return version_struct
 }
 
 // Get alto representation from Tesseract-OCR as XML format
-pub fn image_to_alto_xml(image string) ?string {
+pub fn image_to_alto_xml(t Tesseract) ?string {
 	// Tesseract option: -c tessedit_create_alto=1
 
 	// Check version for alto support
@@ -149,15 +150,63 @@ pub fn image_to_alto_xml(image string) ?string {
 		return error('vesseract: Alto export require Tesseract >= 4.1.0')
 	}
 
+	// Generate result id
+	id := generate_id()
+	xml_filename := id + '.xml'
+
 	// Run tesseract
-	run_tesseract([image, 'out', '-c tessedit_create_alto=1']) or { return err }
+	run_tesseract([t.image, id, '-c tessedit_create_alto=1', t.args]) or { return err }
 
 	// Read output
-	xml := os.read_file('out.xml') or { return err }
+	xml := os.read_file(xml_filename) or { return err }
 
 	// Delete
-	os.rm('out.xml') ?
+	os.rm(xml_filename) ?
 
 	// Get XML
 	return xml
+}
+
+// Get bounding boxes from Tesseract
+// Return an array of Tesseract boxes
+pub fn image_to_boxes(t Tesseract) ?[]Tesseract_box {
+	// Run tesseract with bounding box detection
+	result := extract_text_tesseract(
+		image: t.image
+		lang: t.lang
+		args: t.args + ' batch.nochop makebox'
+	) or { return err }
+
+	// Load box file
+	box_file := os.read_file(result.id + '.box') or { return err }
+	lines := box_file.split('\n')
+
+	// Delete "box" file and txt
+	os.rm(result.id + '.box') ?
+
+	// Hold results
+	mut boxes := []Tesseract_box{}
+
+	// Parse
+	for line in lines {
+		// Letter, x1, y1, x2, y1, page
+		// Example: H 68 206 91 235 0
+		content := line.split(' ')
+
+		// Skip malformed lines
+		if content.len != 6 {
+			continue
+		}
+
+		boxes << Tesseract_box{
+			letter: content[0]
+			x1: content[1].u32()
+			y1: content[2].u32()
+			x2: content[3].u32()
+			y2: content[4].u32()
+			page: content[5].u32()
+		}
+	}
+
+	return boxes
 }
