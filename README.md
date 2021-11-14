@@ -14,7 +14,7 @@ v install barrack-obama.vesseract
 # Quickstart
 
 ```v
-import vesseract
+import barrack-obama.vesseract
 
 // Extract text from image
 // Image: path - lang: Language for tesseract - args: custom arguments
