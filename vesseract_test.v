@@ -10,6 +10,11 @@ fn tr_find(list []string, item string) bool {
 	return false
 }
 
+fn test_is_language_code_supported() {
+	assert is_language_code_supported("eng")
+	assert is_language_code_supported("UNKNOWN") == false
+}
+
 fn test_get_languages() {
 	langs := get_languages() or { panic(err) }
 

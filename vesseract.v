@@ -56,14 +56,13 @@ pub fn image_to_string(t Tesseract) ?string {
 	return str[..str.len - 2]
 }
 
-// Get installed languages from Tesseract-OCR
-// return a list of languages code
-pub fn get_languages() ?[]string {
-	// Language list
-	mut langs_supported := []string{}
-
+// Generate a map containing all of the languages supported by tesseract
+fn get_language_map() ?map[string]bool {
 	// Get tesseract langs
 	t_result := run_tesseract(['--list-langs']) or { return err }
+
+	// Language list
+	mut langs_supported := map[string]bool{}
 
 	// Split
 	content := t_result.split('\n')
@@ -74,11 +73,40 @@ pub fn get_languages() ?[]string {
 
 		// Filter empty lines
 		if line.len > 0 {
-			langs_supported << content[i]
+			langs_supported[content[i]] = true
 		}
 	}
 
 	return langs_supported
+}
+
+// Get installed languages from Tesseract-OCR
+// return a list of languages code
+pub fn get_languages() ?[]string {
+	// Get tesseract langs
+	t_result := run_tesseract(['--list-langs']) or { return err }
+
+	// Get language map
+	lang_map := get_language_map()  or { return err }
+
+	// Language list
+	mut langs_supported := []string{}
+
+	// Skip first line
+	for code, _ in lang_map {
+		langs_supported << code
+	}
+
+	return langs_supported
+}
+
+// Check if a language code is supported
+// No optional as this make the code easier to write
+// Return false on tesseract error (or not available), return true if supported
+pub fn is_language_code_supported(code string) bool {
+	// Get a map of langages
+	map_lang := get_language_map() or { return false }
+	return code in map_lang
 }
 
 // Get tesseract-OCR version

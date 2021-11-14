@@ -31,15 +31,18 @@ version := vesseract.get_tesseract_version() or { panic(err) }
 // 4.1.0 installed: "Tesseract 4 - 1 - 0 detected!"
 println("Tesseract $version.major - $version.minor - $version.patch detected!")
 
+
 // Get languages supported by Tesseract
 langs := vesseract.get_languages() or { panic(err) }
 // Example: "['afr', 'amh', 'ara', 'asm', ... 'uzb_cyrl', 'vie', 'yid', 'yor']"
 println("$langs")
 
+
 // Get alto xml - Require Tesseract >4.1.0
 alto := vesseract.image_to_alto_xml_path('sample/demo.png') or { panic(err) }
 // "XML: <?xml version="1.0" encoding="UTF-8"?> ... "
 println("XML: $alto")
+
 
 // Get bounding boxes for letters
 boxes := image_to_boxes(image: 'sample/demo.png', lang: 'eng', args: '') or { panic(err) }
@@ -52,6 +55,14 @@ println("$boxes")
     y2: 235
     page: 0
 }, ... "
+
+
+// Check if a language model exists in Tesseract
+if (vesseract.is_language_code_supported("fra")) {
+    // Do stuff...
+} else {
+    // Use another model instead...
+}
 
 ```
 # License
