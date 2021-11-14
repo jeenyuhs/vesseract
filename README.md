@@ -1,6 +1,11 @@
 # Vesseract
 
-A V wrapper for Tesseract-OCR inspired by pytesseract!
+A "WIP" V wrapper for Tesseract-OCR inspired by pytesseract wrapper!
+
+Tesseract OCR is a optical character recognition software made by Google,
+it can "read" text from an image.
+
+First install Tesseract and check if it is registered in your path.
 
 Install the package from VPM:
 ```
@@ -17,20 +22,21 @@ text := vesseract.image_to_string(
         image: 'sample/demo.png', lang: 'eng', args: '') or {
 		panic(err)
 }
-// Got: Hi from Vesseract !
+// "Got: Hi from Vesseract !"
 println("Got: $text")
 
-// Get tesseract version
-version := vesseract.get_tesseract_version()
-// 4.1.0 installed: "Tesseract 4 - 1 - 0 detected!
+// Get Tesseract version
+version := vesseract.get_tesseract_version() or { panic(err) }
+// 4.1.0 installed: "Tesseract 4 - 1 - 0 detected!"
 println("Tesseract $version.major - $version.minor - $version.patch detected!")
 
 // Get languages supported by Tesseract
-langs := vesseract.get_languages()
-// Example: ['afr', 'amh', 'ara', 'asm', ... 'uzb_cyrl', 'vie', 'yid', 'yor']
+langs := vesseract.get_languages() or { panic(err) }
+// Example: "['afr', 'amh', 'ara', 'asm', ... 'uzb_cyrl', 'vie', 'yid', 'yor']"
+println("$langs")
 
-// Get alto xml
-alto := vesseract.image_to_alto_xml()
+// Get alto xml - Require Tesseract >4.1.0
+alto := vesseract.image_to_alto_xml('sample/demo.png') or { panic(err) }
 // "XML: <?xml version="1.0" encoding="UTF-8"?> ... "
 println("XML: $alto")
 ```
