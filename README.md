@@ -22,6 +22,7 @@ text := vesseract.image_to_string(
         image: 'sample/demo.png', lang: 'eng', args: '') or {
 		panic(err)
 }
+// Or simply: vesseract.image_to_string_path('sample/demo.png')
 // "Got: Hi from Vesseract !"
 println("Got: $text")
 
