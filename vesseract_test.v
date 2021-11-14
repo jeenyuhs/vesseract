@@ -68,3 +68,9 @@ fn test_image_to_boxes() {
 	assert boxes[0].y2 == 235
 	assert boxes.len == 16
 }
+
+fn test_image_to_boxes_empty() {
+	boxes := image_to_boxes(image: 'sample/empty.png', lang: 'eng', args: '') or { panic(err) }
+
+	assert boxes.len == 0
+}
