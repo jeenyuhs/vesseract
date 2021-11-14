@@ -8,8 +8,11 @@ const (
 
 pub struct Tesseract {
 pub:
-	image  string
-	conf   string
+	// Image path
+	image string
+	// Custom arguments
+	args string
+	// Set language
 	lang   string
 	output string = 'txt'
 }
@@ -28,44 +31,51 @@ fn run_tesseract(arguments []string) ?string {
 	mut s := os.execute('tesseract ' + arguments.join(' '))
 
 	if s.exit_code != 0 {
-		return error("vesseract - error $s.exit_code \"$s.output\"")
+		return error("vesseract: error $s.exit_code \"$s.output\"")
 	}
 
 	return s.output
 }
 
-fn run_and_get_output(t Tesseract) ?os.Result {
+fn extract_text_tesseract(t Tesseract) ? {
 	if !os.exists(t.image) {
 		return error('vesseract: Image not found.')
 	}
 
+	// Arguments
 	mut args := []string{}
 
+	// Add image path
 	args << t.image
+
+	// Output tmp
 	args << t.output
 
 	if t.lang.len > 0 {
 		args << '-l ' + t.lang
 	}
 
-	if t.conf.len > 0 {
-		args << t.conf
-	}
-	mut s := os.execute('tesseract ' + args.join(' '))
-
-	if s.exit_code != 0 {
-		return error("vesseract - error $s.exit_code \"$s.output\"")
+	// Add more args if required
+	if t.args.len > 0 {
+		args << t.args
 	}
 
-	return s
+	// Run tesseract with custom arguments
+	run_tesseract(args) or { return err }
 }
 
-pub fn extract_string(t Tesseract) ?string {
-	run_and_get_output(t) or { return err }
+// Extract text from image
+pub fn image_to_string(t Tesseract) ?string {
+	// Run tesseract
+	extract_text_tesseract(t) or { return err }
+
+	// Tmp txt file output
 	path := t.output + '.txt'
 
+	// Read output
 	str := os.read_file(path) or { return err }
 
+	// Remove tmp txt file
 	os.rm(path) ?
 
 	return str[..str.len - 2]

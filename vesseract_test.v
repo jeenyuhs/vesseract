@@ -27,12 +27,18 @@ fn test_get_tesseract_version() {
 	assert ver.patch > 0
 }
 
-fn test_string_extraction_dan() {
-	text := extract_string(image: 'sample/snippet_dan.png', lang: 'dan', conf: '--oem 1 --psm 3') or {
+fn test_image_to_string_dan() {
+	text := image_to_string(image: 'sample/snippet_dan.png', lang: 'dan', args: '--oem 1 --psm 3') or {
 		panic(err)
 	}
 	line := text.split('\n').filter(it != '')
 
 	assert line[1] == 'Jeg sad i havestuen i Georgia Pines med min fars fyldepen'
 	assert line[4].contains('Den Grønne Mil')
+}
+
+fn test_image_to_string_demo() {
+	text := image_to_string(image: 'sample/demo.png', lang: 'eng', args: '') or { panic(err) }
+
+	assert text == 'Hi from Vesseract !'
 }
