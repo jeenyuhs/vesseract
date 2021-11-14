@@ -1,6 +1,25 @@
 module vesseract
 
-fn test_string_extraction() {
+// Used for tests
+fn tr_find(list []string, item string) bool {
+	for e in list {
+		if e == item {
+			return true
+		}
+	}
+	return false
+}
+
+fn test_get_languages() {
+	langs := get_languages() or { panic(err) }
+
+	assert tr_find(langs, 'fra')
+	assert tr_find(langs, 'dan')
+	assert tr_find(langs, 'UNKNOWNLANG') == false
+}
+
+
+fn test_string_extraction_dan() {
 	text := extract_string(image: 'sample/snippet_dan.png', lang: 'dan', conf: '--oem 1 --psm 3') or {
 		panic(err)
 	}
